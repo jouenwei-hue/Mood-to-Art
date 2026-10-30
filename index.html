@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mood to Art</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,700&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF6DA; --surface:#FFFBEE; --ink:#2B2620; --ink-soft:#6E6555; --line:#E6D9B5;
+  --yellow:#FFD84A; --on-yellow:#2B2620; --accent:#E4572E; --btn:#2B2620; --btn-ink:#FFD84A;
+  --care:#5B6B3A; --err:#B23A1E;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --sans:"Figtree","Helvetica Neue",Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1E1B15; --surface:#29251D; --ink:#F3EBD8; --ink-soft:#B3A88F; --line:#3D372B;
+  --accent:#F08A6B; --btn:#FFD84A; --btn-ink:#1E1B15; --care:#B9C98F; --err:#F08A6B; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#1E1B15; --surface:#29251D; --ink:#F3EBD8; --ink-soft:#B3A88F; --line:#3D372B;
+  --accent:#F08A6B; --btn:#FFD84A; --btn-ink:#1E1B15; --care:#B9C98F; --err:#F08A6B; color-scheme:dark;}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;min-height:100vh}
+.top{background:var(--yellow);color:var(--on-yellow)}
+.top-in{max-width:520px;margin:0 auto;padding:18px 22px;display:flex;justify-content:space-between;align-items:baseline}
+h1{font-family:var(--serif);font-weight:700;font-size:22px;margin:0;letter-spacing:.01em}
+nav{display:flex;gap:4px}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:4px 8px;font-family:var(--sans);font-size:15px;color:var(--on-yellow);opacity:.65;cursor:pointer}
+.tab[aria-current="page"]{opacity:1;border-bottom-color:var(--on-yellow)}
+main{max-width:520px;margin:0 auto;padding:22px 22px 48px}
+button{font-family:var(--sans);cursor:pointer}
+button:focus-visible,textarea:focus-visible,.cell:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.view{display:none}.view.on{display:block}
+.small{font-size:14px;color:var(--ink-soft);margin:0}
+.strip-wrap{margin-bottom:28px}
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+.cell{display:block;width:100%;aspect-ratio:1/1;border-radius:6px;border:1px solid var(--line);background:none;padding:0;overflow:hidden}
+.cell.has{border-color:transparent}
+.cell img{width:100%;height:100%;object-fit:cover;display:block}
+.cell.today{outline:2px solid var(--ink);outline-offset:1px}
+.dl-lbl{display:block;text-align:center;font-size:12px;color:var(--ink-soft);margin-top:3px}
+label.q{font-family:var(--serif);font-size:28px;line-height:1.3;display:block;margin-bottom:14px}
+textarea{width:100%;resize:vertical;font-family:var(--serif);color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;font-size:20px;line-height:1.6;min-height:120px}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);margin:8px 2px 22px}
+.err{color:var(--err);font-size:14px;min-height:1.6em;margin:-12px 0 10px}
+.primary{width:100%;padding:16px;background:var(--btn);color:var(--btn-ink);border:0;border-radius:10px;font-size:17px;font-weight:700;letter-spacing:.03em}
+.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px}
+.link{background:none;border:0;padding:0;color:var(--ink-soft);font-size:15px;text-decoration:underline;text-underline-offset:3px}
+.wait{aspect-ratio:4/3;background:var(--surface);border-radius:6px;position:relative;overflow:hidden}
+.wait::after{content:"";position:absolute;inset:-30%;background:radial-gradient(circle,color-mix(in srgb,var(--yellow) 55%,transparent),transparent 60%);animation:breathe 4.5s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.3;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+@media (prefers-reduced-motion:reduce){.wait::after{animation:none}}
+.wait-text{font-family:var(--serif);font-size:19px;text-align:center;margin:22px 0 0}
+#back{margin-bottom:16px}
+.painting{display:block;width:100%;height:auto;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,.08),0 12px 30px rgba(0,0,0,.12);transition:opacity 1.6s ease-out,filter 2.2s ease-out}
+.painting.pre{opacity:0;filter:blur(10px)}
+@media (prefers-reduced-motion:reduce){.painting{transition:opacity .3s}}
+.r-mood{font-family:var(--serif);font-size:22px;line-height:1.45;margin:20px 0 4px}
+.r-meta{font-size:14px;color:var(--ink-soft);margin:0}
+.row{display:flex;gap:10px;margin-top:24px}.row .ghost{flex:1}
+.dl{display:none;gap:10px;margin-top:10px}.dl.on{display:flex}.dl .ghost{flex:1;font-size:14px}
+.verse{font-family:var(--serif);font-size:19px;line-height:1.7;margin:22px 2px 0;display:none}
+.verse.on{display:block}
+.verse cite{display:block;font-family:var(--sans);font-style:normal;font-size:14px;color:var(--ink-soft);margin-top:6px}
+.care{margin:22px 2px 0;font-size:15px;color:var(--care);line-height:1.7}
+.tomorrow{font-family:var(--serif);color:var(--ink-soft);text-align:center;margin:36px 0 0;font-size:18px}
+.week{margin-bottom:40px}
+.week h2{font-family:var(--serif);font-weight:400;font-size:22px;margin:0}
+.entry{margin-top:26px;cursor:pointer}
+.entry h3{font-family:var(--sans);font-weight:500;font-size:14px;color:var(--ink-soft);margin:0 0 8px}
+.entry img{display:block;width:100%;border-radius:6px}
+.entry p{font-family:var(--serif);font-size:18px;margin:10px 0 0}
+.entry:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+.empty{font-family:var(--serif);color:var(--ink-soft);text-align:center;font-size:18px;margin:40px 0}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <h1>Mood to Art</h1>
+  <nav aria-label="Main"><button class="tab" data-t="today">Today</button><button class="tab" data-t="journal">Journal</button></nav>
+</div></div>
+<main>
+  <div class="strip-wrap" id="home-strip">
+    <p class="small">This week</p>
+    <div class="strip" id="strip"></div>
+  </div>
+
+  <section id="v-write" class="view">
+    <label class="q" for="mood">How are you feeling today?</label>
+    <textarea id="mood" maxlength="200" placeholder="e.g. a little tired, a little annoyed"></textarea>
+    <div class="meta"><span>One painting a day.</span><span id="count">0 / 200</span></div>
+    <p class="err" id="err" role="alert"></p>
+    <button class="primary" id="go">Paint today’s feeling</button>
+  </section>
+
+  <section id="v-wait" class="view" aria-live="polite">
+    <div class="wait"></div>
+    <p class="wait-text">Choosing colours and materials for your sentence…</p>
+  </section>
+
+  <section id="v-day" class="view">
+    <button class="link" id="back">← Journal</button>
+    <img id="art" class="painting" alt="">
+    <p class="r-mood" id="r-mood"></p>
+    <p class="r-meta" id="r-meta"></p>
+    <div class="row">
+      <button class="ghost" id="verse-btn" aria-expanded="false">Show verse</button>
+      <button class="ghost" id="save-btn" hidden>Download</button>
+    </div>
+    <div class="dl" id="dl">
+      <button class="ghost" data-v="0">Painting only</button>
+      <button class="ghost" data-v="1">With verse</button>
+    </div>
+    <div class="verse" id="verse"></div>
+    <p class="care" id="care" hidden>If you’re carrying something heavy, you don’t have to carry it alone. Tell someone you trust, or reach out to a support line where you live. Someone wants to listen.</p>
+    <p class="tomorrow" id="tomorrow">Come back tomorrow for tomorrow’s feeling.</p>
+  </section>
+
+  <section id="v-journal" class="view">
+    <div id="weeks"></div>
+    <p class="empty" id="journal-empty" hidden>Your journal is empty.<br>It starts with today’s feeling.</p>
+  </section>
+</main>
+
+<script>
+const VERSES=[
+ {id:"v01",ref:"Matthew 11:28",tags:"tired pressure burdened",text:"Come unto me, all ye that labour and are heavy laden, and I will give you rest."},
+ {id:"v03",ref:"1 Peter 5:7",tags:"anxious worried uneasy care",text:"Casting all your care upon him; for he careth for you."},
+ {id:"v04",ref:"John 14:27",tags:"afraid unsettled peace",text:"Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid."},
+ {id:"v05",ref:"Psalm 34:18",tags:"sad loss heartbroken",text:"The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit."},
+ {id:"v06",ref:"Psalm 147:3",tags:"hurt grief",text:"He healeth the broken in heart, and bindeth up their wounds."},
+ {id:"v07",ref:"Isaiah 41:10",tags:"afraid lonely weak",text:"Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness."},
+ {id:"v08",ref:"Isaiah 40:31",tags:"weary waiting powerless",text:"But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint."},
+ {id:"v09",ref:"Proverbs 3:5–6",tags:"lost direction choices",text:"Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths."},
+ {id:"v10",ref:"Psalm 119:105",tags:"lost darkness direction",text:"Thy word is a lamp unto my feet, and a light unto my path."},
+ {id:"v11",ref:"Psalm 118:24",tags:"joy happy ordinary day",text:"This is the day which the LORD hath made; we will rejoice and be glad in it."},
+ {id:"v12",ref:"Lamentations 3:22–23",tags:"new start hope morning",text:"It is of the LORD’S mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness."},
+ {id:"v13",ref:"Psalm 107:1",tags:"grateful content",text:"O give thanks unto the LORD; for he is good: for his mercy endureth for ever."},
+ {id:"v14",ref:"Romans 15:13",tags:"hope expectation",text:"Now the God of hope fill you with all joy and peace in believing, that ye may abound in hope, through the power of the Holy Ghost."},
+ {id:"v15",ref:"Psalm 16:11",tags:"joy fulfilled",text:"Thou wilt shew me the path of life: in thy presence is fulness of joy; at thy right hand there are pleasures for evermore."},
+ {id:"v16",ref:"Zephaniah 3:17",tags:"loved worth unseen",text:"The LORD thy God in the midst of thee is mighty; he will save, he will rejoice over thee with joy; he will rest in his love, he will joy over thee with singing."},
+ {id:"v17",ref:"Deuteronomy 31:8",tags:"lonely new place afraid",text:"And the LORD, he it is that doth go before thee; he will be with thee, he will not fail thee, neither forsake thee: fear not, neither be dismayed."}
+];
+const ENGINES={watercolor:"Watercolour",oil:"Oil",impasto:"Impasto",crayon:"Crayon",pastel:"Soft pastel",pencil:"Coloured pencil",charcoal:"Charcoal",ink:"Ink wash",collage:"Collage",abstract:"Colour field",woodcut:"Woodcut"};
+const KINDS=["field","band","blob","circle","mountain","line","scatter"];
+const $=s=>document.querySelector(s);
+const JKEY="m2a-final:journal",RECENT="m2a-final:recent";
+const pad2=n=>String(n).padStart(2,"0");
+const dkey=d=>d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+const today=()=>dkey(new Date());
+const parseKey=k=>{const[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)};
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+let artCanvas=null,viewing=null;
+const downloads={async save({filename,data}){const url=URL.createObjectURL(data);const a=document.createElement("a");a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}};
+let journal=store.get(JKEY)||{};
+const saveJ=()=>store.set(JKEY,journal);
+
+/* ---------- brush engine ---------- */
+let W=1200,H=900,R,N,G,toothCache,A,PAPER;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function makeNoise(){const p=new Float32Array(65536);for(let i=0;i<p.length;i++)p[i]=R();const g=(x,y)=>p[((y&255)<<8)|(x&255)];const sm=t=>t*t*(3-2*t);
+ return (x,y)=>{const xi=Math.floor(x),yi=Math.floor(y),u=sm(x-xi),v=sm(y-yi),a=g(xi,yi),b=g(xi+1,yi),c=g(xi,yi+1),d=g(xi+1,yi+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}}
+const rr=(a,b)=>a+R()*(b-a);
+function gauss(){let u=0,v=0;while(!u)u=R();while(!v)v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function hex(h){h=String(h||"").replace("#","");if(h.length===3)h=h.split("").map(c=>c+c).join("");const n=parseInt(h,16);return isNaN(n)||h.length!==6?null:[n>>16&255,n>>8&255,n&255]}
+const css=(c,a)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
+const jit=(c,k)=>c.map(v=>Math.max(0,Math.min(255,v+(R()-.5)*k)));
+const shade=(c,k)=>c.map(v=>k<0?v*(1+k):v+(255-v)*k);
+const lum=c=>.3*c[0]+.59*c[1]+.11*c[2];
+function mk(){const c=document.createElement("canvas");c.width=W;c.height=H;return c}
+function polyPath(p){const q=new Path2D();q.moveTo(p[0][0],p[0][1]);for(const v of p)q.lineTo(v[0],v[1]);q.closePath();return q}
+function bbox(p){let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const v of p){a=Math.min(a,v[0]);b=Math.min(b,v[1]);c=Math.max(c,v[0]);d=Math.max(d,v[1])}return[a,b,c,d]}
+function centroid(p){let x=0,y=0;for(const v of p){x+=v[0];y+=v[1]}return[x/p.length,y/p.length]}
+function scaleAbout(p,c,k){return p.map(v=>[c[0]+(v[0]-c[0])*k,c[1]+(v[1]-c[1])*k])}
+function rotAbout(p,c,a){const s=Math.sin(a),k=Math.cos(a);return p.map(v=>{const x=v[0]-c[0],y=v[1]-c[1];return[c[0]+x*k-y*s,c[1]+x*s+y*k]})}
+function deform(p,depth,v){let o=p;for(let d=0;d<depth;d++){const n=[];for(let i=0;i<o.length;i++){const a=o[i],b=o[(i+1)%o.length],l=Math.hypot(b[0]-a[0],b[1]-a[1]);n.push(a,[(a[0]+b[0])/2+gauss()*l*v,(a[1]+b[1])/2+gauss()*l*v])}o=n}return o}
+function ellipse(cx,cy,rx,ry,n,j){const p=[];for(let i=0;i<n;i++){const t=i/n*Math.PI*2,k=1+gauss()*j;p.push([cx+Math.cos(t)*rx*k,cy+Math.sin(t)*ry*k])}return p}
+function strokeSmooth(c,p){c.beginPath();c.moveTo(p[0][0],p[0][1]);for(let i=1;i<p.length-1;i++)c.quadraticCurveTo(p[i][0],p[i][1],(p[i][0]+p[i+1][0])/2,(p[i][1]+p[i+1][1])/2);const l=p[p.length-1];c.lineTo(l[0],l[1]);c.stroke()}
+function jitterPath(p,k){return p.map(v=>[v[0]+gauss()*k,v[1]+gauss()*k])}
+
+function shapeFor(el){const cx=el.x*W,cy=el.y*H,w=el.w*W,h=el.h*H,m=Math.min(W,H);
+ switch(el.kind){
+  case"circle":return ellipse(cx,cy,el.w*m/2,el.h*m/2,18,.015);
+  case"blob":return ellipse(cx,cy,el.w*m/2,el.h*m/2,10,.18);
+  case"band":{const t=[],b=[],o=R()*9;for(let i=0;i<=12;i++){const x=-220+i*(W+440)/12;t.push([x,cy-h/2+(N(i*.35+o,o)-.5)*h*.9]);b.push([x,cy+h/2>H*.85?H+60:cy+h/2+(N(i*.35+o,o+3)-.5)*h*.9])}return t.concat(b.reverse())}
+  case"mountain":{const r=[],x0=cx-w/2,o=R()*9;for(let i=0;i<=28;i++){const t=i/28,pk=Math.pow(Math.sin(Math.PI*t),1.1)*(.55+.7*N(t*4+o,o));r.push([x0+w*t,cy-h*pk])}return r.concat([[cx+w/2,cy+8],[x0,cy+8]])}
+  default:{const x0=cx-w/2,y0=cy-h/2;return[[x0,y0],[cx,y0],[x0+w,y0],[x0+w,cy],[x0+w,y0+h],[cx,y0+h],[x0,y0+h],[x0,cy]]}
+ }}
+function linePath(el){const n=36,cx=el.x*W,cy=el.y*H,w=el.w*W,h=el.h*H,o=R()*9,f=1+R()*2,p=[];
+ for(let i=0;i<=n;i++){const t=i/n;p.push([cx-w/2+w*t,cy+Math.sin(t*Math.PI*f+o)*h*.4+(N(t*3+o,o)-.5)*h*.5])}
+ return rotAbout(p,[cx,cy],el.rot||0)}
+
+function tooth(thr){if(toothCache[thr])return toothCache[thr];const c=mk(),x=c.getContext("2d"),id=x.createImageData(W,H),d=id.data;
+ for(let p=0;p<W*H;p++){const a=Math.max(0,Math.min(1,(G[p]-thr)*7));d[p*4+3]=a*255}x.putImageData(id,0,0);return toothCache[thr]=c}
+function withLayer(ctx,thr,fn){const L=mk(),c=L.getContext("2d");c.lineCap="round";c.lineJoin="round";fn(c);if(thr!=null){c.globalCompositeOperation="destination-in";c.drawImage(tooth(thr),0,0)}ctx.drawImage(L,0,0)}
+function hatch(c,p,col,o){const bb=bbox(p),cx=(bb[0]+bb[2])/2,cy=(bb[1]+bb[3])/2,D=Math.hypot(bb[2]-bb[0],bb[3]-bb[1])/2+12;
+ c.save();c.clip(polyPath(p));
+ for(let k=0;k<o.passes;k++){const a=A+k*.6+gauss()*.06,ca=Math.cos(a),sa=Math.sin(a);
+  for(let t=-D;t<=D;t+=o.gap*(.7+R()*.6)){c.strokeStyle=css(jit(col,o.cj||22),o.alpha*(.55+R()*.45));c.lineWidth=o.width*(.7+R()*.6);c.beginPath();
+   for(let s=-D,f=1;s<=D+24;s+=24,f=0){const x=cx+ca*s-sa*t+gauss()*o.wob,y=cy+sa*s+ca*t+gauss()*o.wob;f?c.moveTo(x,y):c.lineTo(x,y)}c.stroke()}}
+ c.restore()}
+function bristle(c,p,col,width,o){const n=o.n||12;const nm=p.map((v,i)=>{const a=p[Math.max(0,i-1)],b=p[Math.min(p.length-1,i+1)],dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1;return[-dy/l,dx/l]});
+ const base=jit(col,o.cj||20);
+ for(let b=0;b<n;b++){const off=(b/(n-1)-.5)*width;const q=p.map((v,i)=>{const t=i/(p.length-1),tp=.35+.65*Math.pow(Math.sin(Math.PI*t),.5);return[v[0]+nm[i][0]*off*tp,v[1]+nm[i][1]*off*tp]});
+  c.strokeStyle=css(jit(base,o.bj||16),o.alpha*(.5+R()*.5));c.lineWidth=Math.max(1,width/n*1.5*(.6+R()*.8));
+  if(o.dry){c.setLineDash([rr(30,120),rr(3,40)*o.dry]);c.lineDashOffset=rr(0,100)}strokeSmooth(c,q)}
+ c.setLineDash([])}
+function oilStroke(c,x,y,ang,len,wid,col,thick){const dx=Math.cos(ang),dy=Math.sin(ang),bend=gauss()*.25;const p=[];for(let i=0;i<=6;i++){const t=i/6-.5;p.push([x+dx*len*t-dy*len*bend*(t*t-.25),y+dy*len*t+dx*len*bend*(t*t-.25)])}
+ bristle(c,p,col,wid,{n:Math.max(4,wid/2.2|0),alpha:.85,cj:28,bj:18});
+ if(thick){const hl=p.map(v=>[v[0]-dy*wid*.35,v[1]+dx*wid*.35]);c.strokeStyle=css(shade(col,.45),.45);c.lineWidth=1.6;strokeSmooth(c,hl);
+  const sh=p.map(v=>[v[0]+dy*wid*.45,v[1]-dx*wid*.45]);c.strokeStyle=css(shade(col,-.45),.35);c.lineWidth=1.4;strokeSmooth(c,sh)}}
+const inkTone=c=>{const g=lum(c)*.55;return[g+8,g+5,g]};
+
+function fillBy(eng,ctx,p,col,w,small,el){
+ switch(eng){
+ case"watercolor":{const base=deform(p,2,small?.1:.16),L=small?7:26;ctx.save();ctx.globalCompositeOperation="multiply";
+  for(let i=0;i<L;i++){const q=polyPath(deform(base,3,.14));ctx.fillStyle=css(jit(col,26),.025+.03*w);ctx.fill(q);if(i%5===0){ctx.strokeStyle=css(shade(col,-.3),.06);ctx.lineWidth=1.6;ctx.stroke(q)}}
+  if(!small){const bb=bbox(p),q=polyPath(base);ctx.fillStyle=css(shade(col,-.35),.18);for(let i=0;i<1400;i++){const x=rr(bb[0],bb[2]),y=rr(bb[1],bb[3]);if(ctx.isPointInPath(q,x,y))ctx.fillRect(x,y,rr(.8,2.2),rr(.8,2.2))}}
+  ctx.restore();break}
+ case"oil":case"impasto":{const thick=eng==="impasto",q=polyPath(deform(p,2,.05)),bb=bbox(p);ctx.fillStyle=css(shade(col,-.12),.9);ctx.fill(q);
+  const area=(bb[2]-bb[0])*(bb[3]-bb[1]),n=small?4:Math.min(1500,area/(thick?260:200)|0);
+  for(let i=0;i<n;i++){const x=rr(bb[0],bb[2]),y=rr(bb[1],bb[3]);if(!ctx.isPointInPath(q,x,y))continue;const ang=A+(N(x/260,y/260)-.5)*Math.PI*1.2;
+   oilStroke(ctx,x,y,ang,small?rr(8,16):rr(18,58),small?rr(5,10):rr(thick?14:8,thick?28:18),col,thick)}break}
+ case"crayon":withLayer(ctx,.36,c=>{const q=deform(p,2,.05);hatch(c,q,col,{width:7,gap:8,alpha:.9,wob:2.2,passes:2});c.strokeStyle=css(col,.6);c.lineWidth=4;for(let k=0;k<2;k++)c.stroke(polyPath(deform(q,1,.02)))});break
+ case"pastel":withLayer(ctx,.5,c=>{c.filter="blur(1.6px)";hatch(c,deform(p,2,.06),col,{width:12,gap:8,alpha:.5,wob:2.5,passes:2});c.filter="none"});break
+ case"pencil":withLayer(ctx,.45,c=>{const q=deform(p,2,.04);hatch(c,q,col,{width:1.3,gap:3.2,alpha:.6,wob:.7,passes:3,cj:30});c.strokeStyle=css(shade(col,-.2),.5);c.lineWidth=1.2;c.stroke(polyPath(deform(q,1,.01)))});break
+ case"charcoal":{const t=inkTone(col);withLayer(ctx,.32,c=>{const q=deform(p,2,.08);c.filter="blur(12px)";c.fillStyle=css(t,.4);c.fill(polyPath(q));c.filter="none";hatch(c,q,t,{width:2.2,gap:6,alpha:.5,wob:1.2,passes:1,cj:10});c.strokeStyle=css(shade(t,-.3),.7);c.lineWidth=3;c.stroke(polyPath(deform(q,1,.02)))});break}
+ case"ink":{const t=el.kind==="circle"?col:inkTone(col),ct=centroid(p),L=small?4:14;ctx.save();ctx.globalCompositeOperation="multiply";ctx.filter="blur(2.5px)";
+  for(let i=0;i<L;i++){ctx.fillStyle=css(jit(t,10),.05+.06*w);ctx.fill(polyPath(deform(scaleAbout(p,ct,1-i/L*.45),2,.08)))}ctx.filter="none";ctx.restore();
+  if(el.kind==="mountain"&&!small){const ridge=p.slice(0,p.length-2);bristle(ctx,jitterPath(ridge,3),shade(inkTone(col),-.35),rr(18,34),{n:22,alpha:.55,dry:2.2,cj:14})}break}
+ case"collage":{const c0=centroid(p),tp=rotAbout(deform(p,4,.022),c0,gauss()*.1);ctx.save();ctx.shadowColor="rgba(40,30,20,.3)";ctx.shadowBlur=small?3:10;ctx.shadowOffsetY=small?1:4;ctx.fillStyle="#F7F4EC";ctx.fill(polyPath(scaleAbout(tp,c0,1.025)));ctx.restore();
+  const inner=deform(tp,1,.008),q=polyPath(inner);ctx.fillStyle=css(jit(col,10),.96);ctx.fill(q);ctx.save();ctx.clip(q);texture(ctx,bbox(inner),col);ctx.restore();break}
+ case"abstract":{ctx.save();ctx.filter="blur(6px)";for(let i=0;i<(small?3:10);i++){ctx.fillStyle=css(jit(col,16),.1+.07*w);ctx.fill(polyPath(deform(p,2,.04)))}ctx.filter="none";ctx.restore();break}
+ case"woodcut":withLayer(ctx,.16,c=>{const q=polyPath(deform(p,2,.03));c.fillStyle=css(col,.96);c.fill(q);if(small)return;c.save();c.clip(q);c.strokeStyle=css(PAPER,1);
+  const bb=bbox(p),D=Math.hypot(bb[2]-bb[0],bb[3]-bb[1])/2,cx=(bb[0]+bb[2])/2,cy=(bb[1]+bb[3])/2,ca=Math.cos(A),sa=Math.sin(A);
+  for(let t=-D;t<D;t+=rr(9,17)){if(R()<.25)continue;const s0=rr(-D,0),s1=rr(0,D),pts=[];for(let s=s0;s<=s1;s+=20)pts.push([cx+ca*s-sa*(t+Math.sin(s/40)*3),cy+sa*s+ca*(t+Math.sin(s/40)*3)]);if(pts.length<2)continue;c.lineWidth=rr(1.5,4);strokeSmooth(c,pts)}c.restore()});break
+ }}
+function texture(c,bb,col){const t=R()*4|0,dk=css(shade(col,-.3),.32);c.strokeStyle=dk;c.fillStyle=dk;
+ if(t===0){c.lineWidth=rr(2,5);for(let y=bb[1];y<bb[3];y+=rr(9,18)){c.beginPath();c.moveTo(bb[0],y);c.lineTo(bb[2],y);c.stroke()}}
+ else if(t===1){for(let x=bb[0];x<bb[2];x+=11)for(let y=bb[1];y<bb[3];y+=11){c.beginPath();c.arc(x+(y/11%2)*5.5,y,2.4,0,7);c.fill()}}
+ else if(t===2){c.lineWidth=.9;for(let y=bb[1];y<bb[3];y+=9){c.beginPath();c.moveTo(bb[0],y);c.lineTo(bb[2],y);c.stroke()}}
+ else{c.fillStyle=css(shade(col,.4),.4);for(let i=0;i<400;i++)c.fillRect(rr(bb[0],bb[2]),rr(bb[1],bb[3]),rr(1,3),rr(1,3))}}
+function lineBy(eng,ctx,p,col,w){
+ switch(eng){
+ case"watercolor":ctx.save();ctx.globalCompositeOperation="multiply";ctx.lineCap="round";ctx.filter="blur(1px)";for(let i=0;i<6;i++){ctx.strokeStyle=css(jit(col,16),.08+.05*w);ctx.lineWidth=rr(8,26);strokeSmooth(ctx,jitterPath(p,4))}ctx.filter="none";ctx.restore();break
+ case"oil":bristle(ctx,p,col,rr(22,42),{n:12,alpha:.85});break
+ case"impasto":bristle(ctx,p,col,rr(30,54),{n:14,alpha:.9});bristle(ctx,p.map(v=>[v[0],v[1]-6]),shade(col,.4),rr(10,20),{n:6,alpha:.4,dry:.6});break
+ case"crayon":withLayer(ctx,.36,c=>{for(let i=0;i<3;i++){c.strokeStyle=css(jit(col,16),.85);c.lineWidth=rr(5,8);strokeSmooth(c,jitterPath(p,2.5))}});break
+ case"pastel":withLayer(ctx,.5,c=>{c.filter="blur(1.5px)";for(let i=0;i<4;i++){c.strokeStyle=css(jit(col,16),.45);c.lineWidth=rr(14,22);strokeSmooth(c,jitterPath(p,4))}c.filter="none"});break
+ case"pencil":withLayer(ctx,.45,c=>{for(let i=0;i<6;i++){c.strokeStyle=css(jit(col,24),.6);c.lineWidth=rr(1.2,2);strokeSmooth(c,jitterPath(p,2))}});break
+ case"charcoal":{const t=inkTone(col);withLayer(ctx,.32,c=>{c.filter="blur(6px)";c.strokeStyle=css(t,.35);c.lineWidth=26;strokeSmooth(c,p);c.filter="none";for(let i=0;i<3;i++){c.strokeStyle=css(shade(t,-.3),.75);c.lineWidth=rr(4,7);strokeSmooth(c,jitterPath(p,2))}});break}
+ case"ink":bristle(ctx,p,shade(inkTone(col),-.3),rr(14,34),{n:16,alpha:.8,dry:1,cj:10});break
+ case"collage":{const nm=[],a=rr(8,16);const top=p.map((v,i)=>{const b=p[Math.min(p.length-1,i+1)],q=p[Math.max(0,i-1)],dx=b[0]-q[0],dy=b[1]-q[1],l=Math.hypot(dx,dy)||1;nm.push([-dy/l,dx/l]);return[v[0]-dy/l*a,v[1]+dx/l*a]});
+  const bot=p.map((v,i)=>[v[0]-nm[i][0]*a,v[1]-nm[i][1]*a]).reverse();fillBy("collage",ctx,top.concat(bot),col,w,false,{kind:"band"});break}
+ case"abstract":bristle(ctx,p,col,rr(36,72),{n:18,alpha:.8,dry:.35});break
+ case"woodcut":withLayer(ctx,.16,c=>{c.strokeStyle=css(col,.96);c.lineWidth=rr(10,24);strokeSmooth(c,p)});break
+ }}
+
+async function renderArt(brief,seed){
+ W=brief.orientation==="portrait"?900:1200;H=brief.orientation==="portrait"?1200:900;R=mulberry32(seed);N=makeNoise();toothCache={};A=brief.angle;
+ G=new Float32Array(W*H);for(let p=0;p<W*H;p++){const x=p%W,y=p/W|0;G[p]=.55*N(x/1.6,y/1.6)+.3*N(x/5,y/5)+.15*R()}
+ const cv=mk(),ctx=cv.getContext("2d");ctx.lineCap="round";ctx.lineJoin="round";
+ PAPER=brief.paper;const e0=brief.engines[0],canvasWeave=e0==="oil"||e0==="impasto";
+ ctx.fillStyle=css(PAPER,1);ctx.fillRect(0,0,W,H);
+ const id=ctx.getImageData(0,0,W,H),d=id.data;
+ for(let p=0,i=0;p<W*H;p++,i+=4){const x=p%W,y=p/W|0;let v=(G[p]-.5)*12+(N(x/110+40,y/110)-.5)*12;if(canvasWeave)v+=((x%6<3)!==(y%6<3))?5:-5;d[i]+=v;d[i+1]+=v;d[i+2]+=v}
+ ctx.putImageData(id,0,0);
+ if(brief.engines.includes("ink")){ctx.lineWidth=.7;for(let i=0;i<260;i++){ctx.strokeStyle=css(shade(PAPER,-.2),.12);const x=rr(0,W),y=rr(0,H),a=rr(0,7),l=rr(10,50);ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.cos(a)*l/2+rr(-6,6),y+Math.sin(a)*l/2+rr(-6,6),x+Math.cos(a)*l,y+Math.sin(a)*l);ctx.stroke()}}
+ for(const el of brief.elements){
+  const eng=brief.engines[el.engine]||e0,col=brief.palette[el.color]||brief.palette[0];
+  if(el.kind==="line")lineBy(eng,ctx,linePath(el),col,el.weight);
+  else if(el.kind==="scatter"){const n=Math.round(14+el.weight*40);for(let i=0;i<n;i++){const s=rr(.012,.05),sub={kind:R()<.5?"blob":"circle",x:el.x+(R()-.5)*el.w,y:el.y+(R()-.5)*el.h,w:s,h:s*rr(.7,1.3)};fillBy(eng,ctx,shapeFor(sub),jit(col,30),el.weight,true,sub)}}
+  else fillBy(eng,ctx,shapeFor(el),col,el.weight,false,el);
+  await new Promise(r=>setTimeout(r,0));
+ }
+ if(brief.engines.includes("ink")){const s=rr(34,48),x=R()<.5?rr(70,130):rr(W-190,W-120),y=rr(H-200,H-110),q=deform([[x,y],[x+s,y],[x+s,y+s],[x,y+s]],2,.035);
+  ctx.fillStyle="rgba(176,38,32,.86)";ctx.fill(polyPath(q));ctx.strokeStyle=css(PAPER,.85);ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(x+s*.25,y+s*.3);ctx.lineTo(x+s*.75,y+s*.3);ctx.moveTo(x+s*.5,y+s*.22);ctx.lineTo(x+s*.5,y+s*.8);ctx.moveTo(x+s*.28,y+s*.62);ctx.lineTo(x+s*.72,y+s*.7);ctx.stroke()}
+ const gr=mk(),gx=gr.getContext("2d"),gi=gx.createImageData(W,H),gd=gi.data;for(let p=0;p<W*H;p++){const v=200+G[p]*55;gd[p*4]=gd[p*4+1]=gd[p*4+2]=v;gd[p*4+3]=255}gx.putImageData(gi,0,0);
+ ctx.globalCompositeOperation="multiply";ctx.globalAlpha=.35;ctx.drawImage(gr,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation="source-over";
+ return cv;
+}
+
+/* ---------- art director ---------- */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+const clamp=(v,a,b,d)=>{v=Number(v);return isNaN(v)?d:Math.max(a,Math.min(b,v))};
+function cleanBrief(b){
+ const engines=(Array.isArray(b.engines)?b.engines:[]).filter(e=>ENGINES[e]).slice(0,2);if(!engines.length)engines.push("watercolor");
+ const palette=(Array.isArray(b.palette)?b.palette:[]).map(hex).filter(Boolean).slice(0,6);while(palette.length<3)palette.push([[70,90,120],[200,160,110],[150,70,80]][palette.length]);
+ const paper=hex(b.paper)||(engines[0]==="ink"?[238,231,214]:[246,243,236]);
+ const els=(Array.isArray(b.elements)?b.elements:[]).slice(0,10).map(e=>({kind:KINDS.includes(e.kind)?e.kind:"blob",x:clamp(e.x,-.1,1.1,.5),y:clamp(e.y,-.1,1.1,.5),w:clamp(e.w,.01,1.3,.4),h:clamp(e.h,.01,1.1,.3),color:clamp(e.color,0,palette.length-1,0)|0,engine:clamp(e.engine,0,engines.length-1,0)|0,weight:clamp(e.weight,.1,1,.6),rot:clamp(e.rot,-1.6,1.6,0)}));
+ if(!els.length)els.push({kind:"band",x:.5,y:.6,w:1.2,h:.5,color:0,engine:0,weight:.6,rot:0},{kind:"blob",x:.5,y:.4,w:.4,h:.35,color:1,engine:0,weight:.7,rot:0});
+ return{orientation:b.orientation==="portrait"?"portrait":"landscape",medium:String(b.medium||engines.map(e=>ENGINES[e]).join(" × ")).slice(0,20),engines,palette,paper,angle:clamp(b.angle,-1.6,1.6,-.3),elements:els,verse_id:b.verse_id,care:!!b.care};
+}
+async function direct(mood){
+ const recent=store.get(RECENT)||[];
+ const r=await fetch("/api/paint",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mood,recent})});
+ if(!r.ok)throw new Error("api "+r.status);
+ return cleanBrief((await r.json())||{});
+}
+
+
+
+/* ---------- helpers ---------- */
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const WDAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+function mondayOf(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function weekTitle(mon){const sun=addDays(mon,6);return MON[mon.getMonth()]+" "+mon.getDate()+" – "+(sun.getMonth()!==mon.getMonth()?MON[sun.getMonth()]+" ":"")+sun.getDate()}
+const longDate=k=>{const d=parseKey(k);return WDAYS[d.getDay()]+", "+MONTHS[d.getMonth()]+" "+d.getDate()};
+function scaled(cv,w,q){const t=document.createElement("canvas");t.width=w;t.height=Math.round(w*cv.height/cv.width);t.getContext("2d").drawImage(cv,0,0,t.width,t.height);return t.toDataURL("image/jpeg",q)}
+function show(id){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id===id))}
+function setTab(t){document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current",b.dataset.t===t?"page":"false"));$("#home-strip").hidden=t!=="today"}
+
+/* ---------- today ---------- */
+function stripCells(container,mon,onPick){
+ container.innerHTML="";const t=today();
+ for(let i=0;i<7;i++){
+  const k=dkey(addDays(mon,i)),e=journal[k],w=document.createElement("div");
+  const c=document.createElement(e?"button":"div");c.className="cell"+(e?" has":"")+(k===t?" today":"");
+  if(e){const im=document.createElement("img");im.src=e.thumb;im.alt="";c.append(im);c.setAttribute("aria-label",longDate(k)+": “"+e.mood+"”");c.addEventListener("click",()=>onPick(e))}
+  const l=document.createElement("span");l.className="dl-lbl";l.textContent=WDAYS[(i+1)%7].slice(0,3);
+  w.append(c,l);container.append(w);
+ }
+}
+async function openToday(){
+ setTab("today");window.scrollTo(0,0);
+ stripCells($("#strip"),mondayOf(new Date()),e=>openDay(e,{fromJournal:false}));
+ const e=journal[today()];
+ if(e)await openDay(e,{});else show("v-write");
+}
+async function openDay(e,{fresh=false,canvas=null,fromJournal=false}){
+ viewing=e;artCanvas=canvas||await renderArt(e.brief,e.seed);
+ const img=$("#art");img.className="painting"+(fresh?" pre":"");img.src=artCanvas.toDataURL("image/jpeg",.92);
+ img.alt=e.brief.medium+" painting of: “"+e.mood+"”";
+ $("#r-mood").textContent="“"+e.mood+"”";
+ $("#r-meta").textContent=longDate(e.date)+" · "+e.brief.medium;
+ const isToday=e.date===today();
+ $("#back").hidden=!fromJournal;$("#tomorrow").hidden=!isToday;
+ const v=VERSES.find(x=>x.id===e.verse_id),box=$("#verse"),vb=$("#verse-btn");
+ box.classList.remove("on");box.innerHTML="";vb.setAttribute("aria-expanded","false");vb.textContent="Show verse";
+ if(v){const p=document.createElement("p");p.style.margin="0";p.textContent=v.text;const c=document.createElement("cite");c.textContent=v.ref+" (KJV)";box.append(p,c);vb.hidden=false}else vb.hidden=true;
+ $("#care").hidden=!e.care;$("#save-btn").hidden=!downloads;$("#dl").classList.remove("on");
+ if(fromJournal)setTab("journal");
+ show("v-day");
+ if(fresh)requestAnimationFrame(()=>requestAnimationFrame(()=>img.classList.remove("pre")));
+}
+$("#mood").addEventListener("input",e=>{$("#count").textContent=e.target.value.length+" / 200";$("#err").textContent=""});
+$("#go").addEventListener("click",async()=>{
+ const mood=$("#mood").value.trim();
+ if(journal[today()]){openToday();return}
+ if(!mood){$("#err").textContent="Write a few words first.";return}
+ show("v-wait");
+ try{
+  const brief=await direct(mood);
+  await new Promise(r=>setTimeout(r,60));
+  const seed=(Math.random()*2**31)|0,cv=await renderArt(brief,seed);
+  const e={date:today(),mood,brief,seed,verse_id:VERSES.some(v=>v.id===brief.verse_id)?brief.verse_id:null,care:brief.care,thumb:scaled(cv,200,.7),img:scaled(cv,600,.78)};
+  journal[e.date]=e;
+  if(!saveJ()){delete e.img;saveJ()}
+  store.set(RECENT,brief.engines.concat(store.get(RECENT)||[]).slice(0,3));
+  $("#mood").value="";$("#count").textContent="0 / 200";
+  stripCells($("#strip"),mondayOf(new Date()),x=>openDay(x,{}));
+  await openDay(e,{fresh:true,canvas:cv});
+ }catch(err){show("v-write");$("#err").textContent="Today’s painting didn’t come through. This one doesn’t count, so please try again."}
+});
+
+/* ---------- journal ---------- */
+function openJournal(){
+ setTab("journal");window.scrollTo(0,0);
+ const keys=Object.keys(journal).sort(),wrap=$("#weeks");wrap.innerHTML="";
+ $("#journal-empty").hidden=keys.length>0;
+ if(!keys.length){show("v-journal");return}
+ const thisMon=mondayOf(new Date()),first=mondayOf(parseKey(keys[0]));
+ for(let mon=thisMon,n=0;mon>=first&&n<52;mon=addDays(mon,-7),n++){
+  const sec=document.createElement("section");sec.className="week";
+  const h=document.createElement("h2");h.textContent=(n===0?"This week · ":"")+weekTitle(mon);
+  const s=document.createElement("div");s.className="strip";
+  sec.append(h,s);stripCells(s,mon,e=>{const el=document.getElementById("e-"+e.date);if(el)el.scrollIntoView({behavior:"smooth",block:"start"})});
+  for(let i=6;i>=0;i--){const k=dkey(addDays(mon,i)),e=journal[k];if(!e)continue;
+   const a=document.createElement("article");a.className="entry";a.id="e-"+k;a.tabIndex=0;a.setAttribute("role","button");
+   const h3=document.createElement("h3");h3.textContent=WDAYS[parseKey(k).getDay()];
+   const im=document.createElement("img");im.src=e.img||e.thumb;im.alt=e.brief.medium+" painting of: “"+e.mood+"”";
+   const p=document.createElement("p");p.textContent="“"+e.mood+"”";
+   a.append(h3,im,p);const go=()=>openDay(e,{fromJournal:true});a.addEventListener("click",go);a.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();go()}});
+   sec.append(a)}
+  wrap.append(sec);
+ }
+ show("v-journal");
+}
+$("#back").addEventListener("click",openJournal);
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>b.dataset.t==="journal"?openJournal():openToday()));
+
+/* ---------- verse & download ---------- */
+$("#verse-btn").addEventListener("click",e=>{const on=$("#verse").classList.toggle("on");e.target.textContent=on?"Hide verse":"Show verse";e.target.setAttribute("aria-expanded",on)});
+$("#save-btn").addEventListener("click",()=>{if(!viewing.verse_id)exportImage(false);else $("#dl").classList.toggle("on")});
+$("#dl").addEventListener("click",e=>{const b=e.target.closest("button");if(b)exportImage(b.dataset.v==="1")});
+function wrapText(ctx,text,maxW){const out=[];let line="";for(const w of String(text).split(/(\s+)/)){const t=line+w;if(ctx.measureText(t).width>maxW&&line.trim()){out.push(line.trim());line=w.trim()}else line=t}if(line.trim())out.push(line.trim());return out}
+async function exportImage(withVerse){
+ if(!downloads||!artCanvas)return;const e=viewing;let blob;
+ if(!withVerse){blob=await new Promise(r=>artCanvas.toBlob(r,"image/png"))}
+ else{
+  try{await document.fonts.ready}catch(x){}
+  const aw=artCanvas.width,ah=artCanvas.height,pad=90,W2=aw+pad*2,c=document.createElement("canvas"),ctx=c.getContext("2d"),v=VERSES.find(x=>x.id===e.verse_id);
+  const blocks=[{font:"44px 'Newsreader', Georgia, serif",color:"#2B2620",text:"“"+e.mood+"”",lh:62,gap:64},
+   {font:"26px 'Figtree', Arial, sans-serif",color:"#6E6555",text:longDate(e.date)+" · "+e.brief.medium,lh:38,gap:10},
+   {font:"36px 'Newsreader', Georgia, serif",color:"#2B2620",text:v.text,lh:56,gap:56},
+   {font:"26px 'Figtree', Arial, sans-serif",color:"#6E6555",text:v.ref+" (KJV)",lh:38,gap:10}];
+  let H2=pad+ah;blocks.forEach(b=>{ctx.font=b.font;b.lines=wrapText(ctx,b.text,aw);H2+=b.gap+b.lines.length*b.lh});H2+=pad;
+  c.width=W2;c.height=H2;ctx.fillStyle="#FFF6DA";ctx.fillRect(0,0,W2,H2);ctx.fillStyle="#FFD84A";ctx.fillRect(0,0,W2,14);ctx.drawImage(artCanvas,pad,pad);
+  let y=pad+ah;blocks.forEach(b=>{ctx.font=b.font;ctx.fillStyle=b.color;y+=b.gap;b.lines.forEach(l=>{y+=b.lh;ctx.fillText(l,pad,y-b.lh*.28)})});
+  blob=await new Promise(r=>c.toBlob(r,"image/png"));
+ }
+ try{await downloads.save({filename:"mood-to-art-"+e.date+(withVerse?"-verse":"")+".png",data:blob})}catch(x){}
+ $("#dl").classList.remove("on");
+}
+
+/* ---------- start ---------- */
+if(location.hash==="#reset"){delete journal[today()];saveJ();try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}}
+openToday();
+
+</script>
+</body>
+</html>
